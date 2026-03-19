@@ -44,7 +44,6 @@ fi
 if ! command -v brew &>/dev/null; then
   echo "→ Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  # Add brew to PATH for the rest of this script
   eval "$(/opt/homebrew/bin/brew shellenv)"
 else
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -116,15 +115,27 @@ echo "✓ Log directory ready"
 PLIST_DST="$HOME/Library/LaunchAgents/$PLIST_NAME.plist"
 PLIST_SRC="$REPO_DIR/$PLIST_NAME.plist"
 
-# Unload existing if present
+# Bootout existing service if running
 if launchctl list | grep -q "$PLIST_NAME" 2>/dev/null; then
-  echo "→ Unloading existing launchd service..."
-  launchctl unload "$PLIST_DST" 2>/dev/null || true
+  echo "→ Removing existing launchd service..."
+  launchctl bootout gui/$(id -u) "$PLIST_DST" 2>/dev/null || true
 fi
 
-# Write a machine-specific plist with absolute paths resolved
+# Write machine-specific plist with absolute paths substituted
 sed "s|REPO_DIR_PLACEHOLDER|$REPO_DIR|g" "$PLIST_SRC" > "$PLIST_DST"
-launchctl load "$PLIST_DST"
+
+# Validate plist was written and substituted correctly
+if [[ ! -s "$PLIST_DST" ]]; then
+  echo "ERROR: Plist was not written to $PLIST_DST"
+  exit 1
+fi
+if ! grep -q "$REPO_DIR" "$PLIST_DST"; then
+  echo "ERROR: Path substitution failed in plist. Check that $PLIST_SRC is not empty."
+  exit 1
+fi
+
+# Bootstrap the service (modern replacement for launchctl load)
+launchctl bootstrap gui/$(id -u) "$PLIST_DST"
 echo "✓ launchd service installed and started"
 
 # -----------------------------------------------------------------------------

@@ -3,6 +3,7 @@ PLIST_DST    := $(HOME)/Library/LaunchAgents/$(PLIST_NAME).plist
 REPO_DIR     := $(shell pwd)
 LOG_FILE     := $(REPO_DIR)/logs/mlx-server.log
 ERR_FILE     := $(REPO_DIR)/logs/mlx-server.err
+GUI_UID      := $(shell id -u)
 
 .DEFAULT_GOAL := help
 
@@ -33,28 +34,27 @@ bootstrap:
 install:
 	@mkdir -p logs
 	@sed "s|REPO_DIR_PLACEHOLDER|$(REPO_DIR)|g" $(PLIST_NAME).plist > $(PLIST_DST)
-	@launchctl load $(PLIST_DST)
+	@if [ ! -s "$(PLIST_DST)" ]; then echo "ERROR: Plist write failed"; exit 1; fi
+	@launchctl bootstrap gui/$(GUI_UID) $(PLIST_DST)
 	@echo "✓ Service installed"
 
 uninstall:
-	-@launchctl unload $(PLIST_DST) 2>/dev/null
+	-@launchctl bootout gui/$(GUI_UID) $(PLIST_DST) 2>/dev/null
 	@rm -f $(PLIST_DST)
 	@echo "✓ Service removed"
 
 start:
-	launchctl start $(PLIST_NAME)
+	launchctl kickstart -k gui/$(GUI_UID)/$(PLIST_NAME)
 
 stop:
-	launchctl stop $(PLIST_NAME)
+	launchctl kill SIGTERM gui/$(GUI_UID)/$(PLIST_NAME)
 
 restart:
-	launchctl stop $(PLIST_NAME)
-	@sleep 2
-	launchctl start $(PLIST_NAME)
+	launchctl kickstart -k gui/$(GUI_UID)/$(PLIST_NAME)
 	@echo "✓ Restarted"
 
 status:
-	@launchctl list | grep mlx || echo "⚠ MLX server not running"
+	@launchctl print gui/$(GUI_UID)/$(PLIST_NAME) 2>/dev/null | grep -E "state|pid|path" || echo "⚠ MLX server not running"
 	@echo ""
 	@echo "Last 5 log lines:"
 	@tail -5 $(LOG_FILE) 2>/dev/null || echo "(no log yet)"
