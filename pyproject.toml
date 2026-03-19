@@ -1,0 +1,12 @@
+[project]
+name = "mlx-server"
+version = "1.0.0"
+description = "Production MLX-LM inference server for Apple Silicon"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "mlx-lm>=0.21.0",
+    "huggingface-hub>=0.26.0",
+]
+
+[dependency-groups]
+dev = []

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+  <!-- Service identity -->
+  <key>Label</key>
+  <string>com.mlx.server</string>
+
+  <!-- Run start.sh via zsh -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>REPO_DIR_PLACEHOLDER/start.sh</string>
+  </array>
+
+  <!-- Start on login -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Restart on crash, but not on clean exit (make stop won't loop) -->
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+
+  <!-- Minimum 10s between restart attempts to avoid tight crash loops -->
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <!-- Working directory -->
+  <key>WorkingDirectory</key>
+  <string>REPO_DIR_PLACEHOLDER</string>
+
+  <!-- Logs -->
+  <key>StandardOutPath</key>
+  <string>REPO_DIR_PLACEHOLDER/logs/mlx-server.log</string>
+  <key>StandardErrorPath</key>
+  <string>REPO_DIR_PLACEHOLDER/logs/mlx-server.err</string>
+
+</dict>
+</plist>
