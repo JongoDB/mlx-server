@@ -78,25 +78,9 @@ The server exposes an OpenAI-compatible API on port 8080:
 curl http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "default",
+    "model": "mlx-community/Meta-Llama-3.1-70B-Instruct-4bit",
     "messages": [{"role": "user", "content": "Hello"}]
   }'
-```
-
-## Architecture
-
-```
-Coworkers
-    │
-    ▼
-Cloudflare Tunnel
-    │
-    ▼
-LiteLLM Proxy  (API key management, load balancing, routing)
-    │
-    ├──▶ This Mac  :8080  (MLX — Apple Silicon)
-    ├──▶ Mac 2     :8080  (MLX — Apple Silicon)
-    └──▶ Windows   :8080  (llama.cpp — CUDA)
 ```
 
 ## Replicating to Additional Macs
