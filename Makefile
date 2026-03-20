@@ -69,7 +69,7 @@ test:
 	@echo "→ Sending test completion..."
 	@source config.env && curl -sf http://localhost:$$MLX_PORT/v1/chat/completions \
 		-H "Content-Type: application/json" \
-		-d '{"model":"default","messages":[{"role":"user","content":"Reply with exactly three words: server is working"}],"max_tokens":20}' \
+		-d "{\"model\":\"$$MLX_MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with exactly three words: server is working\"}],\"max_tokens\":20}" \
 		| python3 -m json.tool
 	@echo ""
 
